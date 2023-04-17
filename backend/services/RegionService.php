@@ -8,10 +8,6 @@ use Models\CountryModel;
 
 class RegionService
 {
-    protected $cities;
-    protected $countries;
-    protected $countryLanguages;
-
     protected function populateCountryData($countries, $cities, $languages): array
     {
         $populatedCountries = [];
