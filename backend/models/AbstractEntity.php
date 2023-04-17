@@ -4,9 +4,9 @@ namespace Models;
 
 use Utils\QueryBuilder;
 
-class AbstractEntity
+abstract class AbstractEntity
 {
-    protected $tableName = '';
+    protected $tableName;
     protected $fields = '';
 
     /** 
