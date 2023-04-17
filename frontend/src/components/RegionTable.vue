@@ -29,7 +29,7 @@ import { fetchRegions, type IRegion } from '@/utils/RegionService'
 const isDataLoaded = ref(false)
 const regions: Ref<IRegion[]> = ref([])
 onMounted(async () => {
-  const data = await fetchRegions('http://192.168.100.115:8081/api/region')
+  const data = await fetchRegions(import.meta.env.VITE_REGION_API_URL)
   if (data !== false) {
     regions.value = data
     isDataLoaded.value = true
