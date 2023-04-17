@@ -3,7 +3,7 @@ DCF = docker-compose.yml
 
 .PHONY: node-enter
 node-enter:
-	@docker compose --file=$(DCF) run --rm node /bin/bash
+	@docker compose --file=$(DCF) run --rm node /bin/sh
 
 .PHONY: npm-i
 npm-i:

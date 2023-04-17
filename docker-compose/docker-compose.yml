@@ -51,6 +51,7 @@ services:
     image: node:19-alpine
     volumes:
       - "../frontend:/var/www/frontend"
+    working_dir: /var/www/frontend
     networks:
       default:
         ipv4_address: 172.24.0.5
