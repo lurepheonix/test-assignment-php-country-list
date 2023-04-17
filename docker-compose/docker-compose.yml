@@ -1,0 +1,65 @@
+version: "3.9"
+services:
+  web:
+    image: nginx:1.23
+    volumes:
+      - "../backend:/var/www/backend"
+      - type: bind
+        source: ./nginx/conf/nginx.conf
+        target: /etc/nginx/nginx.conf
+      - "./nginx/conf/conf.d:/etc/nginx/conf.d"
+      - "./nginx/conf/sites:/etc/nginx/sites"
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      default:
+        ipv4_address: 172.24.0.2
+    depends_on:
+      - db
+      - php
+  php:
+    build: ./php
+    volumes:
+      - "../backend:/var/www/backend"
+    working_dir: /var/www/backend
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-country_list}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-adminchangeme}
+      - MYSQL_USER=${MYSQL_USER:-country_list_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-changeme}
+    networks:
+      default:
+        ipv4_address: 172.24.0.3
+    depends_on:
+      - db
+  db:
+    image: mysql:8
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-country_list}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-adminchangeme}
+      - MYSQL_USER=${MYSQL_USER:-country_list_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-changeme}
+    volumes:
+      - "db:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    networks:
+      default:
+        ipv4_address: 172.24.0.4
+  node:
+    image: node:19-alpine
+    volumes:
+      - "../frontend:/var/www/frontend"
+    networks:
+      default:
+        ipv4_address: 172.24.0.5
+volumes:
+  db:
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.24.0.0/24
+          gateway: 172.24.0.1
