@@ -1,0 +1,13 @@
+{
+    "require": {
+        "php-di/php-di": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Controllers\\": "controllers/",
+            "Models\\": "models",
+            "Services\\": "services",
+            "Utils\\": "utils/"
+        }
+    }
+}
