@@ -42,8 +42,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-changeme}
     volumes:
       - "db:/var/lib/mysql"
-    ports:
-      - "3306:3306"
     networks:
       default:
         ipv4_address: 172.24.0.4
