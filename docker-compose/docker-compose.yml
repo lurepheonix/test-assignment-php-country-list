@@ -52,6 +52,9 @@ services:
     volumes:
       - "../frontend:/var/www/frontend"
     working_dir: /var/www/frontend
+    command: "npm run dev"
+    environment:
+      - VITE_REGION_API_URL=${REGION_API_URL}
     networks:
       default:
         ipv4_address: 172.24.0.5
