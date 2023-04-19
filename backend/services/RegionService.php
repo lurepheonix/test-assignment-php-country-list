@@ -81,13 +81,13 @@ class RegionService
                 if ($direction === 'asc') {
                     if (gettype($a[$field]) === 'string') {
                         return strcmp($a[$field], $b[$field]);
-                    } else if (in_array(gettype($a[$field]), ['integer', 'float'])) {
+                    } else if (in_array(gettype($a[$field]), ['integer', 'double', 'float'])) {
                         return $a[$field] > $b[$field];
                     }
                 } else if ($direction === 'desc') {
                     if (gettype($a[$field]) === 'string') {
                         return strcmp($b[$field], $a[$field]);
-                    } else if (in_array(gettype($a[$field]), ['integer', 'float'])) {
+                    } else if (in_array(gettype($a[$field]), ['integer', 'double', 'float'])) {
                         return $a[$field] < $b[$field];
                     }
                 }
