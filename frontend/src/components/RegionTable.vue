@@ -9,13 +9,69 @@
   </template>
   <template v-if="isDataLoaded">
     <DataTable :value="regions" stripedRows>
-      <Column field="continentName" header="Continent" sortable></Column>
-      <Column field="regionName" header="Region" sortable></Column>
-      <Column field="countryCount" header="Countries" sortable></Column>
-      <Column field="avgLifeExpectancy" header="Life expectancy" sortable></Column>
-      <Column field="totalPopulation" header="Population" sortable></Column>
-      <Column field="cityCount" header="Cities" sortable></Column>
-      <Column field="languageCount" header="Languages" sortable></Column>
+      <Column field="continentName">
+        <template #header>
+          <SortableTableHeader  
+            title="Continent"
+            fieldCode="continentName"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="regionName">
+        <template #header>
+          <SortableTableHeader 
+            title="Region"
+            fieldCode="regionName"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="countryCount">
+        <template #header>
+          <SortableTableHeader 
+            title="Countries"
+            fieldCode="countryCount"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="avgLifeExpectancy">
+        <template #header>
+          <SortableTableHeader
+            title="Life expectancy"
+            fieldCode="avgLifeExpectancy"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="totalPopulation">
+        <template #header>
+          <SortableTableHeader
+            title="Population"
+            fieldCode="totalPopulation"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="cityCount">
+        <template #header>
+          <SortableTableHeader
+            title="Cities"
+            fieldCode="cityCount"
+            :activeColumn="activeColumn"
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
+      <Column field="languageCount">
+        <template #header>
+          <SortableTableHeader 
+            title="Languages"
+            fieldCode="languageCount"
+            :activeColumn="activeColumn" 
+            @applyFilters="applyFilters"/>
+        </template>
+      </Column>
     </DataTable>
   </template>
 </template>
@@ -25,14 +81,45 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import ProgressSpinner from 'primevue/progressspinner'
 import { fetchRegions, type IRegion } from '@/utils/RegionService'
+import SortableTableHeader from '@/components/SortableTableHeader.vue'
+
+type Direction = 'asc' | 'desc'
+interface Filter {
+  sort_field?: string
+  sort_direction?: Direction
+}
 
 const isDataLoaded = ref(false)
 const regions: Ref<IRegion[]> = ref([])
-onMounted(async () => {
-  const data = await fetchRegions(import.meta.env.VITE_REGION_API_URL)
+const filters: Ref<Filter> = ref({})
+const activeColumn = ref('')
+
+const refreshRegionList = async () => {
+  const data = await fetchRegions(import.meta.env.VITE_REGION_API_URL, filters.value)
   if (data !== false) {
     regions.value = data
     isDataLoaded.value = true
   }
+}
+
+const applyFilters = async (properties: {
+  field: string, direction: Direction
+}) => {
+  filters.value = {
+    sort_field: properties.field,
+    sort_direction: properties.direction
+  }
+  activeColumn.value = properties.field;
+  await refreshRegionList()
+}
+
+onMounted(async () => {
+  await refreshRegionList()
 })
 </script>
+
+<style>
+.p-datatable .p-datatable-thead > tr > th[role='columnheader'] {
+  padding: 0;
+}
+</style>

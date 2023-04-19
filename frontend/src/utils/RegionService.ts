@@ -10,8 +10,8 @@ export interface IRegion {
   languageCount: number
 }
 
-export const fetchRegions = async (apiUrl: string): Promise<IRegion[] | false> => {
-  const response = await ky.get(apiUrl)
+export const fetchRegions = async (apiUrl: string, options = {}): Promise<IRegion[] | false> => {
+  const response = await ky.get(apiUrl, {searchParams: options})
   if (response.status === 200) {
     return (await response.json()) as unknown as IRegion[]
   }
