@@ -5,9 +5,11 @@ namespace Services;
 use Models\CityModel;
 use Models\CountryLanguageModel;
 use Models\CountryModel;
+use Utils\CaseChanger;
 
 class RegionService
 {
+
     protected function populateCountryData($countries, $cities, $languages): array
     {
         $populatedCountries = [];
@@ -68,13 +70,67 @@ class RegionService
         ];
     }
 
-    function getArray(): array
+    protected function applyFilters(array $regions, array $filters)
     {
+        $tmp = $regions;
+
+        if (isset($filters['orderBy'])) {
+            $field = CaseChanger::snakeToCamel($filters['orderBy']['field']);
+            $direction = $filters['orderBy']['order'];
+            usort($tmp, function ($a, $b) use ($field, $direction) {
+                if ($direction === 'asc') {
+                    if (gettype($a[$field]) === 'string') {
+                        return strcmp($a[$field], $b[$field]);
+                    } else if (in_array(gettype($a[$field]), ['integer', 'float'])) {
+                        return $a[$field] > $b[$field];
+                    }
+                } else if ($direction === 'desc') {
+                    if (gettype($a[$field]) === 'string') {
+                        return strcmp($b[$field], $a[$field]);
+                    } else if (in_array(gettype($a[$field]), ['integer', 'float'])) {
+                        return $a[$field] < $b[$field];
+                    }
+                }
+            });
+        }
+
+        if (isset($filters['limit'])) {
+            $tmp = array_slice($tmp, $filters['offset'], $filters['limit']);
+        }
+
+        return $tmp;
+    }
+
+    public function getArray($filters = []): array
+    {
+        /**
+         * Notice
+         * 
+         * Currently, I've implemented logic like this:
+         * 1. Pull all data required (minimal).
+         * 2. Construct the list of _all_ regions.
+         * 3. Apply offset, limit and sort to that list.
+         * 
+         * This approach has a major drawback: we need to pull data
+         * on all regions from the table and then construct arrays from it.
+         * For now, it's OK. But provided we have a much longer list
+         * of regions, that'll be a performace bottleneck.
+         * 
+         * We can do something like:
+         * `SELECT DISTINCT c.Continent 
+         * FROM country_list.Country
+         * AS c LIMIT X OFFSET Y;`
+         * 
+         * Or use deferred joins to boost performance further.
+         * However, we'd better restructure the database if we need that;
+         * e.g. move regions to the dedicated `Regions` table.
+         */
+
         // Apply some filters, retrieve only the data we actually need
         $cities = (new CityModel)->findAll([
             'select' => [
                 'CountryCode as countryCode'
-            ]
+            ],
         ]);
         $countries = (new CountryModel)->findAll([
             'select' => [
@@ -94,10 +150,14 @@ class RegionService
         $populatedPountries = $this->populateCountryData($countries, $cities, $countryLanguages);
         $regionCountries = $this->getRegionCountries($populatedPountries);
 
-
         foreach ($regionCountries as $regionCountryData) {
             $regions[] = $this->getRegionData($regionCountryData);
         }
+
+        if (count($filters) > 0) {
+            $regions = $this->applyFilters($regions, $filters);
+        }
+
         return $regions;
     }
 }
